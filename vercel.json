@@ -1,4 +1,0 @@
-{
-  "buildCommand": "# No build needed - static app only",
-  "outputDirectory": "."
-}
