@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0" />
+  <meta name="description" content="SpendWise Quick – Lightning-fast mobile expense logger. One-tap categories, instant entry, zero lag." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SpendWise Quick" />
+  <title>SpendWise Quick</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════ STICKY TOP BAR ═══════════ -->
+  <header class="top-bar" id="topBar" role="banner">
+    <div class="top-bar-inner">
+      <!-- Brand -->
+      <div class="top-brand">
+        <svg class="top-logo" width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="9" fill="url(#tg)"/>
+          <defs><linearGradient id="tg" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+          <rect x="7" y="12" width="20" height="14" rx="2.5" fill="white" fill-opacity=".95"/>
+          <rect x="21" y="17" width="5" height="4" rx="2" fill="url(#tg)"/>
+          <rect x="10" y="20" width="2" height="3" rx=".8" fill="#6366f1" fill-opacity=".7"/>
+          <rect x="13" y="18.5" width="2" height="4.5" rx=".8" fill="#8b5cf6" fill-opacity=".7"/>
+          <rect x="16" y="19.5" width="2" height="3.5" rx=".8" fill="#6366f1" fill-opacity=".7"/>
+        </svg>
+        <span class="top-brand-name">SpendWise <span>Quick</span></span>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row" role="region" aria-label="Daily and monthly totals">
+        <div class="stat-pill" id="statToday" aria-label="Today's spending">
+          <span class="stat-label">Today</span>
+          <span class="stat-val" id="todayVal">₹0</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-pill" id="statMonth" aria-label="This month's spending">
+          <span class="stat-label">Month</span>
+          <span class="stat-val" id="monthVal">₹0</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-pill budget-pill" id="statBudget" aria-label="Budget remaining" role="button" tabindex="0" title="Tap to set budget">
+          <span class="stat-label">Left</span>
+          <span class="stat-val" id="budgetLeftVal">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget progress micro-bar -->
+    <div class="micro-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="microProgressTrack">
+      <div class="micro-progress-fill" id="microProgressFill"></div>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main" role="main">
+
+    <!-- ENTRY CARD -->
+    <section class="entry-card" aria-label="Add expense">
+
+      <!-- Amount input -->
+      <div class="amount-wrap">
+        <span class="currency-glyph" aria-hidden="true">₹</span>
+        <input
+          type="text"
+          id="amountInput"
+          class="amount-input"
+          inputmode="decimal"
+          placeholder="0"
+          maxlength="10"
+          autocomplete="off"
+          aria-label="Expense amount in Rupees"
+          aria-required="true"
+        />
+      </div>
+
+      <!-- Note input -->
+      <div class="note-wrap">
+        <input
+          type="text"
+          id="noteInput"
+          class="note-input"
+          placeholder="Add a note (optional)…"
+          maxlength="60"
+          autocomplete="off"
+          aria-label="Transaction note"
+        />
+      </div>
+
+      <!-- Category chips -->
+      <div class="chip-grid" role="group" aria-label="Select category">
+        <button class="chip active" data-cat="Food" data-emoji="🍔" type="button" aria-pressed="true">
+          <span class="chip-emoji" aria-hidden="true">🍔</span>
+          <span class="chip-label">Food</span>
+        </button>
+        <button class="chip" data-cat="Transport" data-emoji="🚖" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">🚖</span>
+          <span class="chip-label">Transport</span>
+        </button>
+        <button class="chip" data-cat="Snacks" data-emoji="☕" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">☕</span>
+          <span class="chip-label">Snacks</span>
+        </button>
+        <button class="chip" data-cat="Study" data-emoji="📚" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">📚</span>
+          <span class="chip-label">Study</span>
+        </button>
+        <button class="chip" data-cat="Shopping" data-emoji="🛍️" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">🛍️</span>
+          <span class="chip-label">Shopping</span>
+        </button>
+        <button class="chip" data-cat="Bills" data-emoji="⚡" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">⚡</span>
+          <span class="chip-label">Bills</span>
+        </button>
+        <button class="chip" data-cat="Other" data-emoji="➕" type="button" aria-pressed="false">
+          <span class="chip-emoji" aria-hidden="true">➕</span>
+          <span class="chip-label">Other</span>
+        </button>
+      </div>
+
+      <!-- Save button -->
+      <button class="save-btn" id="saveBtn" type="button" aria-label="Save expense">
+        <span class="save-btn-icon" id="saveBtnIcon" aria-hidden="true">
+          <!-- default: plus icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </span>
+        <span class="save-btn-text" id="saveBtnText">Save Expense</span>
+      </button>
+
+      <!-- Inline validation message -->
+      <p class="entry-error" id="entryError" role="alert" aria-live="assertive"></p>
+    </section>
+
+    <!-- RECENT TRANSACTIONS -->
+    <section class="history-section" aria-label="Recent transactions">
+      <div class="history-header">
+        <h2 class="history-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Recent
+        </h2>
+        <button class="clear-btn" id="clearBtn" type="button" aria-label="Clear all expenses">
+          Clear all
+        </button>
+      </div>
+
+      <ul class="tx-list" id="txList" role="list" aria-label="Transaction list">
+        <!-- populated by JS -->
+      </ul>
+
+      <div class="tx-empty" id="txEmpty" aria-live="polite">
+        <span class="tx-empty-icon" aria-hidden="true">🧾</span>
+        <p>No expenses yet.<br/>Add your first one above!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════ BUDGET SHEET (bottom drawer) ═══════════ -->
+  <div class="sheet-overlay" id="sheetOverlay" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+    <div class="sheet" id="sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h3 class="sheet-title" id="sheetTitle">Set Monthly Budget</h3>
+      <p class="sheet-desc">SpendWise will show how much you have left for this month.</p>
+      <div class="sheet-input-wrap">
+        <span class="currency-glyph sm" aria-hidden="true">₹</span>
+        <input type="text" id="budgetSheetInput" class="amount-input sm" inputmode="decimal" placeholder="e.g. 10000" maxlength="9" aria-label="Monthly budget amount" />
+      </div>
+      <div class="sheet-presets" role="group" aria-label="Quick preset amounts">
+        <button class="preset" data-v="3000" type="button">₹3K</button>
+        <button class="preset" data-v="5000" type="button">₹5K</button>
+        <button class="preset" data-v="10000" type="button">₹10K</button>
+        <button class="preset" data-v="20000" type="button">₹20K</button>
+      </div>
+      <button class="save-btn sheet-save" id="sheetSaveBtn" type="button">Save Budget</button>
+      <button class="sheet-cancel" id="sheetCancelBtn" type="button">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ CONFIRM CLEAR (bottom sheet) ═══════════ -->
+  <div class="sheet-overlay" id="clearOverlay" role="dialog" aria-modal="true" aria-labelledby="clearTitle" hidden>
+    <div class="sheet sheet-sm">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h3 class="sheet-title danger-title" id="clearTitle">Clear Everything?</h3>
+      <p class="sheet-desc">All your expense records will be permanently deleted.</p>
+      <button class="save-btn danger-btn" id="confirmClearBtn" type="button">Yes, Clear All</button>
+      <button class="sheet-cancel" id="cancelClearBtn" type="button">Keep My Data</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

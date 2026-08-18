@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SpendWise – Smart Budget & Expense Tracker. Track, save, and control your finances with real-time analytics powered by Flask &amp; SQLite." />
+  <title>SpendWise – Smart Budget &amp; Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header class="header" role="banner">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="10" fill="url(#brandGrad)"/>
+            <defs>
+              <linearGradient id="brandGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+            <rect x="6" y="11" width="22" height="16" rx="3" fill="white" fill-opacity="0.95"/>
+            <path d="M6 15 Q6 11 10 11 H26 Q30 11 30 15" stroke="white" stroke-width="1.5" fill="none" stroke-opacity="0.6"/>
+            <rect x="22" y="16.5" width="6" height="5" rx="2.5" fill="url(#brandGrad)"/>
+            <rect x="9" y="20" width="2.5" height="4" rx="1" fill="#6366f1" fill-opacity="0.7"/>
+            <rect x="12.5" y="18" width="2.5" height="6" rx="1" fill="#8b5cf6" fill-opacity="0.7"/>
+            <rect x="16" y="19" width="2.5" height="5" rx="1" fill="#6366f1" fill-opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-name">SpendWise</h1>
+          <p class="brand-tagline">Track, Save, and Control Your Finances</p>
+        </div>
+      </div>
+
+      <nav class="nav-actions" aria-label="Main navigation">
+        <div class="server-badge" id="serverBadge" aria-label="Server status">
+          <span class="server-dot"></span>
+          <span class="server-label">Flask + SQLite</span>
+        </div>
+        <a class="nav-btn" id="exportCsvBtn" href="/api/transactions/export" aria-label="Export transactions to CSV" download>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export CSV</span>
+        </a>
+        <button class="nav-btn danger" id="clearAllBtn" aria-label="Clear all transactions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          <span>Clear All</span>
+        </button>
+        <div class="theme-toggle-wrap" role="group" aria-label="Theme toggle">
+          <span class="theme-icon" aria-hidden="true">&#9728;&#65039;</span>
+          <label class="theme-switch" for="themeToggle" aria-label="Toggle dark/light mode">
+            <input type="checkbox" id="themeToggle" role="switch" aria-checked="true" />
+            <span class="theme-slider"></span>
+          </label>
+          <span class="theme-icon" aria-hidden="true">&#127769;</span>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main-container" role="main">
+
+    <!-- SUMMARY CARDS -->
+    <section class="summary-section" aria-label="Financial Summary">
+      <div class="summary-grid">
+
+        <article class="summary-card balance-card">
+          <div class="card-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+          </div>
+          <div class="card-info">
+            <p class="card-label">Total Balance</p>
+            <p class="card-value" id="totalBalance">&#8377;&#8211;</p>
+          </div>
+        </article>
+
+        <article class="summary-card income-card">
+          <div class="card-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="card-info">
+            <p class="card-label">Total Income</p>
+            <p class="card-value" id="totalIncome">&#8377;&#8211;</p>
+          </div>
+        </article>
+
+        <article class="summary-card expense-card">
+          <div class="card-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          </div>
+          <div class="card-info">
+            <p class="card-label">Total Expenses</p>
+            <p class="card-value" id="totalExpenses">&#8377;&#8211;</p>
+          </div>
+        </article>
+
+        <article class="summary-card budget-card">
+          <div class="card-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div class="card-info">
+            <p class="card-label">Budget Remaining</p>
+            <p class="card-value" id="budgetRemaining">&#8377;&#8211;</p>
+          </div>
+          <button class="edit-budget-btn" id="editBudgetBtn" aria-label="Edit monthly budget" title="Set monthly budget">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </article>
+      </div>
+
+      <!-- Budget Progress -->
+      <div class="budget-progress-wrap" aria-label="Budget progress">
+        <div class="budget-progress-header">
+          <span class="budget-progress-label">Monthly Budget Usage</span>
+          <span class="budget-progress-info">
+            <span id="budgetUsedLabel">&#8377;0</span> of <span id="budgetLimitLabel">&#8377;0</span>
+            &nbsp;|&nbsp;<span id="budgetPercentLabel">0%</span> used
+          </span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-fill" id="budgetProgressFill"></div>
+        </div>
+        <p class="budget-status-msg" id="budgetStatusMsg" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- CONTENT GRID: Form + Chart -->
+    <div class="content-grid">
+
+      <!-- ADD TRANSACTION FORM -->
+      <section class="form-section" aria-label="Add Transaction">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Add Transaction
+          </h2>
+        </div>
+        <form id="transactionForm" novalidate aria-label="Transaction entry form">
+          <div class="form-group">
+            <label for="txTitle" class="form-label">Description <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="txTitle" class="form-input" placeholder="e.g. Groceries, Salary, Books&hellip;" maxlength="120" autocomplete="off" aria-required="true" />
+            <span class="field-error" id="titleError" role="alert" aria-live="assertive"></span>
+          </div>
+          <div class="form-group">
+            <label for="txAmount" class="form-label">Amount <span class="required" aria-hidden="true">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix" aria-hidden="true">&#8377;</span>
+              <input type="number" id="txAmount" class="form-input has-prefix" placeholder="0.00" min="0.01" step="0.01" aria-required="true" />
+            </div>
+            <span class="field-error" id="amountError" role="alert" aria-live="assertive"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <div class="type-toggle" role="group" aria-label="Transaction type">
+              <input type="radio" id="typeExpense" name="txType" value="expense" checked />
+              <label for="typeExpense" class="type-label expense-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                Expense
+              </label>
+              <input type="radio" id="typeIncome" name="txType" value="income" />
+              <label for="typeIncome" class="type-label income-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                Income
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="txCategory" class="form-label">Category <span class="required" aria-hidden="true">*</span></label>
+            <select id="txCategory" class="form-input form-select" aria-required="true">
+              <option value="" disabled selected>Select a category&hellip;</option>
+              <option value="Food &amp; Dining">&#127828; Food &amp; Dining</option>
+              <option value="Transport">&#128663; Transport</option>
+              <option value="Education">&#128218; Education</option>
+              <option value="Shopping">&#128717; Shopping</option>
+              <option value="Bills &amp; Utilities">&#128161; Bills &amp; Utilities</option>
+              <option value="Entertainment">&#127902; Entertainment</option>
+              <option value="Health">&#128138; Health</option>
+              <option value="Travel">&#9992;&#65039; Travel</option>
+              <option value="Others">&#128230; Others</option>
+            </select>
+            <span class="field-error" id="catError" role="alert" aria-live="assertive"></span>
+          </div>
+          <div class="form-group">
+            <label for="txDate" class="form-label">Date</label>
+            <input type="date" id="txDate" class="form-input" aria-label="Transaction date" />
+          </div>
+          <button type="submit" class="btn-primary" id="addTxBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span id="addTxBtnLabel">Add Transaction</span>
+          </button>
+          <div class="form-success" id="formSuccess" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <!-- ANALYTICS SECTION — dual chart grid -->
+      <section class="chart-section" aria-label="Spending Analytics">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Analytics
+          </h2>
+          <div class="chart-tabs" role="tablist" aria-label="Chart type">
+            <button class="chart-tab active" id="tabDonut" role="tab" aria-selected="true">Donut</button>
+            <button class="chart-tab" id="tabBar" role="tab" aria-selected="false">Bar</button>
+          </div>
+        </div>
+
+        <!-- Two-column chart grid -->
+        <div class="chart-grid">
+
+          <!-- Expense Breakdown -->
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <span class="chart-card-dot expense-dot" aria-hidden="true"></span>
+              Expense Breakdown
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="chartCanvas" aria-label="Expense breakdown chart"></canvas>
+              <div class="chart-empty" id="chartEmpty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <p>No expense data yet.</p>
+              </div>
+            </div>
+            <div class="chart-legend" id="chartLegend" aria-label="Expense chart legend"></div>
+          </div>
+
+          <!-- Income Breakdown -->
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <span class="chart-card-dot income-dot" aria-hidden="true"></span>
+              Income Breakdown
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="incomeChartCanvas" aria-label="Income breakdown chart"></canvas>
+              <div class="chart-empty" id="incomeChartEmpty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <p>No income data yet.</p>
+              </div>
+            </div>
+            <div class="chart-legend" id="incomeChartLegend" aria-label="Income chart legend"></div>
+          </div>
+
+        </div><!-- /chart-grid -->
+      </section>
+    </div>
+
+    <!-- TRANSACTION HISTORY -->
+    <section class="history-section" aria-label="Transaction History">
+      <div class="section-header history-header">
+        <h2 class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Transaction History
+        </h2>
+        <div class="history-controls">
+          <div class="filter-tabs" role="tablist" aria-label="Filter transactions">
+            <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true" id="filterAll">All</button>
+            <button class="filter-tab" data-filter="income" role="tab" aria-selected="false" id="filterIncome">Income</button>
+            <button class="filter-tab" data-filter="expense" role="tab" aria-selected="false" id="filterExpense">Expense</button>
+          </div>
+          <div class="search-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="searchInput" class="search-input" placeholder="Search transactions&hellip;" aria-label="Search transactions" />
+          </div>
+          <select id="sortSelect" class="form-input form-select sort-select" aria-label="Sort transactions">
+            <option value="date_desc">Newest First</option>
+            <option value="date_asc">Oldest First</option>
+            <option value="amount_desc">Highest Amount</option>
+            <option value="amount_asc">Lowest Amount</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading Skeleton -->
+      <div class="list-loading" id="listLoading" aria-label="Loading transactions" aria-busy="true">
+        <div class="skeleton-item"></div>
+        <div class="skeleton-item"></div>
+        <div class="skeleton-item"></div>
+      </div>
+
+      <div class="transaction-list" id="transactionList" role="list" aria-label="Transactions" hidden>
+        <div class="tx-empty" id="txEmpty">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <h3>No transactions yet</h3>
+          <p>Add your first transaction using the form above.</p>
+        </div>
+      </div>
+
+      <div class="history-footer">
+        <p class="tx-count" id="txCount" aria-live="polite">Showing <strong>0</strong> transactions</p>
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" aria-label="Pagination" hidden>
+          <button class="page-btn" id="prevPage" aria-label="Previous page" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="page-info" id="pageInfo">1 / 1</span>
+          <button class="page-btn" id="nextPage" aria-label="Next page" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════ BUDGET MODAL ═══════════ -->
+  <div class="modal-overlay" id="budgetModal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="budgetModalTitle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+          Set Monthly Budget
+        </h3>
+        <button class="modal-close" id="budgetModalClose" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Set your monthly spending limit. SpendWise will alert you when you're nearing or exceeding it.</p>
+        <div class="form-group">
+          <label for="budgetInput" class="form-label">Monthly Budget Limit</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix" aria-hidden="true">&#8377;</span>
+            <input type="number" id="budgetInput" class="form-input has-prefix" placeholder="e.g. 20000" min="0" step="1" />
+          </div>
+          <span class="field-error" id="budgetError" role="alert" aria-live="assertive"></span>
+        </div>
+        <div class="modal-presets">
+          <button class="preset-btn" data-value="5000" type="button">&#8377;5K</button>
+          <button class="preset-btn" data-value="10000" type="button">&#8377;10K</button>
+          <button class="preset-btn" data-value="20000" type="button">&#8377;20K</button>
+          <button class="preset-btn" data-value="50000" type="button">&#8377;50K</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelBudgetBtn" type="button">Cancel</button>
+        <button class="btn-primary" id="saveBudgetBtn" type="button">
+          <span id="saveBudgetLabel">Save Budget</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ DELETE CONFIRM MODAL ═══════════ -->
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" hidden>
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="deleteModalTitle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Confirm Delete
+        </h3>
+        <button class="modal-close" id="deleteModalClose" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" id="deleteModalMsg">Are you sure you want to delete this transaction?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelDeleteBtn" type="button">Cancel</button>
+        <button class="btn-danger" id="confirmDeleteBtn" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ CLEAR ALL MODAL ═══════════ -->
+  <div class="modal-overlay" id="clearModal" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle" hidden>
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="clearModalTitle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Clear All Data
+        </h3>
+        <button class="modal-close" id="clearModalClose" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">This will permanently delete <strong>all transactions</strong> from the database. This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelClearBtn" type="button">Cancel</button>
+        <button class="btn-danger" id="confirmClearBtn" type="button">Clear Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

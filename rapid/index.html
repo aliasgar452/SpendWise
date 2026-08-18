@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
+  <meta name="description" content="SpendWise – Ultra-fast zero-friction expense logger. Notepad batch entry, quick grid, and instant tap buttons."/>
+  <meta name="theme-color" content="#0b0c10"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+  <title>SpendWise ⚡</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ═══════ STICKY HEADER ═══════ -->
+  <header class="hdr" id="hdr" role="banner">
+    <div class="hdr-inner">
+      <div class="hdr-brand">
+        <span class="hdr-bolt" aria-hidden="true">⚡</span>
+        <span class="hdr-name">SpendWise</span>
+      </div>
+      <div class="hdr-stats" role="group" aria-label="Spending totals">
+        <div class="hdr-stat">
+          <span class="hdr-k">TODAY</span>
+          <span class="hdr-v" id="hdrToday">₹0</span>
+        </div>
+        <div class="hdr-divider" aria-hidden="true"></div>
+        <div class="hdr-stat hdr-stat-month">
+          <span class="hdr-k">MONTH</span>
+          <span class="hdr-v" id="hdrMonth">₹0</span>
+        </div>
+      </div>
+    </div>
+    <!-- burn bar -->
+    <div class="burn-bar" id="burnBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="burn-fill" id="burnFill"></div>
+    </div>
+  </header>
+
+  <main class="page" id="page">
+
+    <!-- ══════════════════════════════════════
+         SECTION 1 – FAST NOTEPAD
+    ══════════════════════════════════════════ -->
+    <section class="section" id="secNotepad" aria-label="Fast notepad batch entry">
+      <div class="sec-label">
+        <span class="sec-pill">01</span>
+        <span>FAST MULTI-ENTRY NOTEPAD</span>
+      </div>
+
+      <textarea
+        id="notepad"
+        class="notepad"
+        placeholder="Type multiple expenses here, e.g.:&#10;50 chai&#10;20 auto&#10;150 thali&#10;30 printout"
+        rows="5"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+        aria-label="Multi-line expense notepad"
+      ></textarea>
+
+      <!-- Live parse preview strip -->
+      <div class="parse-strip" id="parseStrip" aria-live="polite" hidden></div>
+
+      <button class="log-all-btn" id="logAllBtn" type="button" aria-label="Log all notepad entries">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Log All Entries &nbsp;<kbd>Ctrl+↵</kbd>
+      </button>
+
+      <div class="log-flash" id="logFlash" aria-live="assertive" role="alert"></div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 2 – QUICK GRID
+    ══════════════════════════════════════════ -->
+    <section class="section" id="secGrid" aria-label="Quick entry grid">
+      <div class="sec-label">
+        <span class="sec-pill">02</span>
+        <span>QUICK GRID &nbsp;—&nbsp; Press <kbd>Enter</kbd> to save &amp; continue</span>
+      </div>
+
+      <div class="grid-wrap" id="gridWrap" role="group" aria-label="Quick entry rows">
+        <!-- 5 rows injected by JS -->
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 3 – INSTANT TAP
+    ══════════════════════════════════════════ -->
+    <section class="section" id="secTap" aria-label="Instant tap buttons">
+      <div class="sec-label">
+        <span class="sec-pill">03</span>
+        <span>INSTANT TAP &nbsp;—&nbsp; Pick amount, then category</span>
+      </div>
+
+      <!-- State indicator -->
+      <div class="tap-state" id="tapState" aria-live="polite">
+        <span class="tap-state-amt" id="tapStateAmt">—</span>
+        <span class="tap-state-arrow" aria-hidden="true">→</span>
+        <span class="tap-state-cat" id="tapStateCat">pick a category</span>
+      </div>
+
+      <!-- Amount pills -->
+      <div class="amt-pills" role="group" aria-label="Quick amount selection">
+        <button class="apill" data-v="10"  type="button" aria-pressed="false">+₹10</button>
+        <button class="apill" data-v="20"  type="button" aria-pressed="false">+₹20</button>
+        <button class="apill" data-v="50"  type="button" aria-pressed="false">+₹50</button>
+        <button class="apill" data-v="100" type="button" aria-pressed="false">+₹100</button>
+        <button class="apill" data-v="500" type="button" aria-pressed="false">+₹500</button>
+      </div>
+
+      <!-- Category chips -->
+      <div class="cat-chips" role="group" aria-label="Expense category">
+        <button class="cchip" data-cat="Food"      data-emoji="🍔" type="button">🍔<span>Food</span></button>
+        <button class="cchip" data-cat="Transport" data-emoji="🚖" type="button">🚖<span>Travel</span></button>
+        <button class="cchip" data-cat="Snacks"    data-emoji="☕" type="button">☕<span>Chai</span></button>
+        <button class="cchip" data-cat="Study"     data-emoji="📚" type="button">📚<span>Study</span></button>
+        <button class="cchip" data-cat="Bills"     data-emoji="⚡" type="button">⚡<span>Bills</span></button>
+        <button class="cchip" data-cat="Shopping"  data-emoji="🛍️" type="button">🛍️<span>Shop</span></button>
+      </div>
+
+      <!-- Custom amount for tap section -->
+      <div class="tap-custom-wrap">
+        <span class="tap-cur" aria-hidden="true">₹</span>
+        <input
+          type="text"
+          id="tapCustom"
+          class="tap-custom"
+          inputmode="decimal"
+          placeholder="Custom…"
+          maxlength="7"
+          aria-label="Custom amount for instant tap"
+        />
+        <button class="tap-custom-clear" id="tapClearAmt" type="button" aria-label="Clear selected amount" hidden>✕</button>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 4 – TODAY'S LIVE FEED
+    ══════════════════════════════════════════ -->
+    <section class="section" id="secFeed" aria-label="Today's live expense feed">
+      <div class="sec-label feed-label-row">
+        <div>
+          <span class="sec-pill">04</span>
+          <span>TODAY'S LIVE FEED</span>
+        </div>
+        <button class="clr-today-btn" id="clrTodayBtn" type="button" aria-label="Clear all today's entries">Clear Today</button>
+      </div>
+
+      <ul class="feed" id="feed" role="list" aria-label="Today's expense entries">
+        <!-- populated by JS -->
+      </ul>
+
+      <div class="feed-empty" id="feedEmpty" aria-live="polite">
+        Nothing logged today yet. Use the sections above ↑
+      </div>
+
+      <div class="feed-total-row" id="feedTotalRow" hidden>
+        <span class="feed-total-label">Today's Total</span>
+        <span class="feed-total-val" id="feedTotal">₹0</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast output -->
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
